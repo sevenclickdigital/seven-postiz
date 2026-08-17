@@ -5,6 +5,8 @@ dist
 tmp
 /out-tsc
 .env
+.env.*
+!.env.example
 .apple
 # dependencies
 node_modules
