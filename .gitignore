@@ -57,6 +57,9 @@ Thumbs.db
 
 # ignore Secrets folder
 .secrets/
+
+# Serena (config e memórias do projeto, apenas locais)
+.serena/
 libraries/plugins/src/plugins.ts
 i18n.cache
 
