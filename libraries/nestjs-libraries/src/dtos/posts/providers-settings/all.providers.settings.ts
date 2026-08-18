@@ -25,6 +25,7 @@ import { SkoolDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-setting
 import { WhopDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/whop.dto';
 import { MeweDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/mewe.dto';
 import { TumblrDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/tumblr.dto';
+import { ArticleApiDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/article.api.dto';
 
 export type ProviderExtension<T extends string, M> = { __type: T } & M;
 export type AllProvidersSettings =
@@ -48,6 +49,7 @@ export type AllProvidersSettings =
   | ProviderExtension<'devto', DevToSettingsDto>
   | ProviderExtension<'hashnode', HashnodeSettingsDto>
   | ProviderExtension<'wordpress', WordpressDto>
+  | ProviderExtension<'article-api', ArticleApiDto>
   | ProviderExtension<'listmonk', ListmonkDto>
   | ProviderExtension<'gmb', GmbSettingsDto>
   | ProviderExtension<'facebook', FacebookDto>
@@ -87,6 +89,7 @@ export const allProviders = (setEmpty?: any) => {
     { value: MediumSettingsDto, name: 'medium' },
     { value: DevToSettingsDto, name: 'devto' },
     { value: WordpressDto, name: 'wordpress' },
+    { value: ArticleApiDto, name: 'article-api' },
     { value: HashnodeSettingsDto, name: 'hashnode' },
     { value: ListmonkDto, name: 'listmonk' },
     { value: GmbSettingsDto, name: 'gmb' },

@@ -166,6 +166,7 @@ export const CustomVariables: FC<{
     validation: string;
     type: 'text' | 'password';
     hint?: string;
+    optional?: boolean;
   }>;
   close?: () => void;
   identifier: string;
@@ -183,11 +184,18 @@ export const CustomVariables: FC<{
           splitter.slice(1, -1).join('/'),
           splitter.pop()
         );
+        // Optional fields accept an empty value - the regex only runs once the
+        // user typed something.
+        const validator = item.optional
+          ? string().matches(regex, {
+              message: `${item.label} is invalid`,
+              excludeEmptyString: true,
+            })
+          : string().matches(regex, `${item.label} is invalid`).required();
+
         return {
           ...aIcc,
-          [item.key]: string()
-            .matches(regex, `${item.label} is invalid`)
-            .required(),
+          [item.key]: validator,
         };
       }, {}),
     });
@@ -394,6 +402,7 @@ export const AddProviderComponent: FC<{
       validation: string;
       type: 'text' | 'password';
       hint?: string;
+      optional?: boolean;
     }>;
   }>;
   article: Array<{
@@ -425,6 +434,7 @@ export const AddProviderComponent: FC<{
           defaultValue?: string;
           type: 'text' | 'password';
           hint?: string;
+          optional?: boolean;
         }>
       ) =>
       async () => {
