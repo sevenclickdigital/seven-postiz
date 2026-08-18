@@ -9,6 +9,7 @@ import { User } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
 import { ErrorsService } from '@gitroom/nestjs-libraries/database/prisma/errors/errors.service';
 import { AdminStatsService } from '@gitroom/nestjs-libraries/database/prisma/admin-stats/admin-stats.service';
+import { UsersService } from '@gitroom/nestjs-libraries/database/prisma/users/users.service';
 import dayjs from 'dayjs';
 
 @ApiTags('Admin')
@@ -16,7 +17,8 @@ import dayjs from 'dayjs';
 export class AdminController {
   constructor(
     private _errorsService: ErrorsService,
-    private _adminStatsService: AdminStatsService
+    private _adminStatsService: AdminStatsService,
+    private _userService: UsersService
   ) {}
 
   private assertSuperAdmin(user: User) {
@@ -48,6 +50,21 @@ export class AdminController {
   async listPlatforms(@GetUserFromRequest() user: User) {
     this.assertSuperAdmin(user);
     return this._errorsService.listPlatforms();
+  }
+
+  @Get('/accounts')
+  async listAccounts(
+    @GetUserFromRequest() user: User,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string
+  ) {
+    this.assertSuperAdmin(user);
+    return this._userService.listAccounts({
+      page: page ? parseInt(page, 10) : 0,
+      limit: limit ? parseInt(limit, 10) : 20,
+      search: search || undefined,
+    });
   }
 
   @Get('/stats')

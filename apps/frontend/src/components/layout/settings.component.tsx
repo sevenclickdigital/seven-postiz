@@ -32,6 +32,7 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { SVGLine } from '@gitroom/frontend/components/launches/launches.component';
 import { GlobalSettings } from '@gitroom/frontend/components/settings/global.settings';
 import { ApprovedAppsComponent } from '@gitroom/frontend/components/approved-apps/approved-apps.component';
+import { AdminComponent } from '@gitroom/frontend/components/admin/admin.component';
 export const SettingsPopup: FC<{
   getRef?: Ref<any>;
 }> = (props) => {
@@ -107,6 +108,9 @@ export const SettingsPopup: FC<{
       arr.push({ tab: 'api', label: t('developers', 'Developers') });
     }
     arr.push({ tab: 'approved_apps', label: t('approved_apps', 'Approved Apps') });
+    if (user?.isSuperAdmin) {
+      arr.push({ tab: 'admin', label: t('administration', 'Administration') });
+    }
 
     return arr;
   }, [user, isGeneral, showLogout, t]);
@@ -148,7 +152,7 @@ export const SettingsPopup: FC<{
           )}
         </div>
       </div>
-      <div className="bg-newBgColorInner flex-1 flex-col flex p-[20px] gap-[12px]">
+      <div className="bg-newBgColorInner flex-1 min-w-0 flex-col flex p-[20px] gap-[12px]">
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(submit)}>
             {!!getRef && (
@@ -207,6 +211,12 @@ export const SettingsPopup: FC<{
               {tab === 'approved_apps' && (
                 <div>
                   <ApprovedAppsComponent />
+                </div>
+              )}
+
+              {tab === 'admin' && !!user?.isSuperAdmin && (
+                <div>
+                  <AdminComponent />
                 </div>
               )}
             </div>

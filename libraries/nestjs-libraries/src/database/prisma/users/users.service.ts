@@ -1,5 +1,8 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { UsersRepository } from '@gitroom/nestjs-libraries/database/prisma/users/users.repository';
+import {
+  ListAccountsParams,
+  UsersRepository,
+} from '@gitroom/nestjs-libraries/database/prisma/users/users.repository';
 import { Provider, Role } from '@prisma/client';
 import { UserDetailDto } from '@gitroom/nestjs-libraries/dtos/users/user.details.dto';
 import { EmailNotificationsDto } from '@gitroom/nestjs-libraries/dtos/users/email-notifications.dto';
@@ -35,6 +38,10 @@ export class UsersService {
 
   getImpersonateUser(name: string) {
     return this._organizationRepository.getImpersonateUser(name);
+  }
+
+  listAccounts(params: ListAccountsParams) {
+    return this._usersRepository.listAccounts(params);
   }
 
   getUserByProvider(providerId: string, provider: Provider) {

@@ -10,6 +10,12 @@ import { UserDetailDto } from '@gitroom/nestjs-libraries/dtos/users/user.details
 import { EmailNotificationsDto } from '@gitroom/nestjs-libraries/dtos/users/email-notifications.dto';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 
+export interface ListAccountsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
 @Injectable()
 export class UsersRepository {
   constructor(
@@ -100,6 +106,70 @@ export class UsersRepository {
       },
       take: 10,
     });
+  }
+
+  async listAccounts(params: ListAccountsParams) {
+    const page = Math.max(0, params.page || 0);
+    const limit = Math.min(Math.max(1, params.limit || 20), 100);
+    const skip = page * limit;
+    const search = params.search?.trim();
+
+    const where: any = { deletedAt: null };
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { id: { contains: search } },
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this._user.model.user.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          lastName: true,
+          email: true,
+          providerName: true,
+          isSuperAdmin: true,
+          activated: true,
+          createdAt: true,
+          lastOnline: true,
+          organizations: {
+            select: {
+              id: true,
+              role: true,
+              disabled: true,
+              organization: {
+                select: {
+                  id: true,
+                  name: true,
+                  subscription: {
+                    select: {
+                      subscriptionTier: true,
+                      isLifetime: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+      this._user.model.user.count({ where }),
+    ]);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      hasMore: skip + items.length < total,
+    };
   }
 
   getUserById(id: string) {
