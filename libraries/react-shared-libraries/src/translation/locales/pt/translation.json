@@ -767,5 +767,7 @@
   "admin_accounts_disabled": "Desativado",
   "import_debug_post": "Importar publicação de depuração",
   "add_announcement": "Adicionar anúncio",
-  "approved_apps": "Aplicativos aprovados"
+  "approved_apps": "Aplicativos aprovados",
+  "author": "Autor",
+  "categories": "Categorias"
 }

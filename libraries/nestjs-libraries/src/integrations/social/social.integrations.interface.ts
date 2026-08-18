@@ -200,6 +200,9 @@ export interface SocialProvider
       validation: string;
       type: 'text' | 'password';
       hint?: string;
+      // When set, an empty value is accepted by the connect form and the
+      // validation regex only runs on non-empty input.
+      optional?: boolean;
     }[]
   >;
   name: string;
