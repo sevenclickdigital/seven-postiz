@@ -692,7 +692,7 @@ const AddAnnouncementModal: FC<{ close: () => void }> = ({ close }) => {
   );
 };
 
-const AddAnnouncement = () => {
+export const AddAnnouncement = () => {
   const { openModal } = useModals();
   const t = useT();
 
@@ -799,37 +799,7 @@ const AddTeamMember = () => {
   );
 };
 
-const ViewErrors = () => {
-  const t = useT();
-  const handleClick = useCallback(() => {
-    window.location.href = '/admin/errors';
-  }, []);
-  return (
-    <div
-      className="px-[10px] rounded-[4px] bg-blue-700 text-white cursor-pointer whitespace-nowrap"
-      onClick={handleClick}
-    >
-      {t('view_errors', 'View Errors')}
-    </div>
-  );
-};
-
-const ViewStats = () => {
-  const t = useT();
-  const handleClick = useCallback(() => {
-    window.location.href = '/admin/stats';
-  }, []);
-  return (
-    <div
-      className="px-[10px] rounded-[4px] bg-purple-700 text-white cursor-pointer whitespace-nowrap"
-      onClick={handleClick}
-    >
-      {t('view_stats', 'View Stats')}
-    </div>
-  );
-};
-
-const ImportDebugPost = () => {
+export const ImportDebugPost = () => {
   const { openModal } = useModals();
   const t = useT();
 
@@ -1010,19 +980,11 @@ const SwitchUser = () => {
   );
 };
 
-export const Impersonate = () => {
+const useStopImpersonating = () => {
   const fetch = useFetch();
-  const [name, setName] = useState('');
-  const { isSecured, billingEnabled } = useVariables();
-  const user = useUser();
-  const load = useCallback(async () => {
-    if (!name) {
-      return [];
-    }
-    const value = await (await fetch(`/user/impersonate?name=${name}`)).json();
-    return value;
-  }, [name]);
-  const stopImpersonating = useCallback(async () => {
+  const { isSecured } = useVariables();
+
+  return useCallback(async () => {
     if (!isSecured) {
       setCookie('impersonate', '', -10);
     } else {
@@ -1035,6 +997,42 @@ export const Impersonate = () => {
     }
     window.location.reload();
   }, []);
+};
+
+// The admin tools live inside the settings page, this keeps a way out of an
+// impersonation from any screen — including the ones that hide the menu
+export const ImpersonateIndicator = () => {
+  const t = useT();
+  const stopImpersonating = useStopImpersonating();
+
+  return (
+    <div className="fixed bottom-[12px] end-[12px] z-[500] flex items-center gap-[10px] bg-forth text-white border border-input rounded-[8px] px-[12px] h-[40px]">
+      <div className="text-[13px] whitespace-nowrap">
+        {t('currently_impersonating', 'Currently Impersonating')}
+      </div>
+      <div
+        className="px-[10px] rounded-[4px] bg-red-700 cursor-pointer"
+        onClick={stopImpersonating}
+      >
+        X
+      </div>
+    </div>
+  );
+};
+
+export const ImpersonatePanel = () => {
+  const fetch = useFetch();
+  const [name, setName] = useState('');
+  const { billingEnabled } = useVariables();
+  const user = useUser();
+  const load = useCallback(async () => {
+    if (!name) {
+      return [];
+    }
+    const value = await (await fetch(`/user/impersonate?name=${name}`)).json();
+    return value;
+  }, [name]);
+  const stopImpersonating = useStopImpersonating();
   const t = useT();
 
   const setUser = useCallback(
@@ -1072,75 +1070,69 @@ export const Impersonate = () => {
     );
   }, [data]);
   return (
-    <div>
-      <div className="bg-forth h-[52px] flex justify-center items-center border-input border rounded-[8px] text-white">
-        <div
-          className={`relative flex flex-col ${
-            user?.impersonate ? 'w-full px-[20px]' : 'w-[600px]'
-          }`}
-        >
-          <div className="relative z-[1]">
-            {user?.impersonate ? (
-              <div className="text-center flex justify-center items-center gap-[10px]">
-                <div className="whitespace-nowrap">
-                  {t('currently_impersonating', 'Currently Impersonating')}
-                </div>
-                <div>
-                  <div
-                    className="px-[10px] rounded-[4px] bg-red-500 text-white cursor-pointer"
-                    onClick={stopImpersonating}
-                  >
-                    X
-                  </div>
-                </div>
-                {user?.tier?.current === 'FREE' && <Subscription />}
-                {user?.tier?.team_members && <AddTeamMember />}
-                {billingEnabled && <ManageBilling />}
-                <SwitchUser />
+    <div className="bg-newBgColorInner border border-newTableBorder rounded-[8px] p-[12px] flex flex-col gap-[12px]">
+      <div className="text-[16px] font-[600]">
+        {t('impersonation', 'Impersonation')}
+      </div>
+      <div className="relative flex flex-col">
+        <div className="relative z-[1]">
+          {user?.impersonate ? (
+            <div className="flex items-center gap-[10px] flex-wrap">
+              <div className="whitespace-nowrap">
+                {t('currently_impersonating', 'Currently Impersonating')}
               </div>
-            ) : (
-              <div className="flex items-center gap-[10px]">
-                <div className="flex-1">
-                  <Input
-                    autoComplete="off"
-                    placeholder="Write the user details"
-                    name="impersonate"
-                    disableForm={true}
-                    label=""
-                    removeError={true}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <ImportDebugPost />
-                <AddAnnouncement />
-                <ViewErrors />
-                <ViewStats />
+              <Button
+                onClick={stopImpersonating}
+                className="!bg-red-700 rounded-[4px] !h-[32px] !px-[12px] text-[13px]"
+              >
+                {t('stop_impersonating', 'Stop impersonating')}
+              </Button>
+              {user?.tier?.current === 'FREE' && <Subscription />}
+              {user?.tier?.team_members && <AddTeamMember />}
+              {billingEnabled && <ManageBilling />}
+              <SwitchUser />
+            </div>
+          ) : (
+            <div className="flex items-end gap-[10px]">
+              <div className="flex-1">
+                <Input
+                  autoComplete="off"
+                  placeholder={t(
+                    'write_the_user_details',
+                    'Write the user details'
+                  )}
+                  name="impersonate"
+                  disableForm={true}
+                  label=""
+                  removeError={true}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
               </div>
-            )}
-          </div>
-          {!!data?.length && (
-            <>
-              <div
-                className="bg-primary/80 fixed start-0 top-0 w-full h-full z-[998]"
-                onClick={() => setName('')}
-              />
-              <div className="absolute top-[100%] w-max min-w-full max-w-[90vw] start-0 bg-sixth border border-customColor6 text-textColor z-[999]">
-                {mapData?.map((user: any) => (
-                  <div
-                    onClick={setUser(user?.id)}
-                    key={user?.id}
-                    className="p-[10px] border-b border-customColor6 hover:bg-tableBorder cursor-pointer whitespace-nowrap truncate"
-                  >
-                    {t('user_1', 'user:')}
-                    {user?.id?.split('-')?.at(-1)} - {user?.name} - {user?.email}{' '}
-                    - {user?.orgName} ({user?.role} / {user?.tier})
-                  </div>
-                ))}
-              </div>
-            </>
+            </div>
           )}
         </div>
+        {!!data?.length && (
+          <>
+            <div
+              className="bg-primary/80 fixed start-0 top-0 w-full h-full z-[998]"
+              onClick={() => setName('')}
+            />
+            <div className="absolute top-[100%] w-max min-w-full max-w-[90vw] start-0 bg-sixth border border-customColor6 text-textColor z-[999]">
+              {mapData?.map((user: any) => (
+                <div
+                  onClick={setUser(user?.id)}
+                  key={user?.id}
+                  className="p-[10px] border-b border-customColor6 hover:bg-tableBorder cursor-pointer whitespace-nowrap truncate"
+                >
+                  {t('user_1', 'user:')}
+                  {user?.id?.split('-')?.at(-1)} - {user?.name} - {user?.email} -{' '}
+                  {user?.orgName} ({user?.role} / {user?.tier})
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
